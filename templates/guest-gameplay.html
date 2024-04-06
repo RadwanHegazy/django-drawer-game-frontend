@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gameplay</title>
+    <link rel="stylesheet" href="style/gameplay.css">
+</head>
+<body>
+    
+    <img src="images/bg.png" alt="" class="bg">
+    
+    <div class="container">
+        <div class="left">
+            
+            
+        </div>
+
+        <div class="right guest">
+            
+            <div class="msg">
+                <small>Radwan Gaber</small>
+                <div class="body">Apple</div>
+            </div>
+
+
+            <div class="msg">
+                <small>Ahmed</small>
+                <div class="body">Banana asd</div>
+            </div>
+            
+
+
+            <div class="send-msg">
+                <input type="text" placeholder="ادخل الرسالة هنا">
+                <button>ارسال</button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+            
+            function DeleteAllObjects(){
+                var objs = document.querySelectorAll('.object');
+                objs.forEach(o=>o.remove())
+            }
+            
+    
+            var msgCont = document.querySelector('.send-msg input');
+            var sendMsgBtn = document.querySelector('.send-msg button');
+            
+            sendMsgBtn.addEventListener('click',()=>{
+                var msg = msgCont.value;
+                var username = "Radwan"; // replace with current authenticated user
+                var sender_id = "12"; // replace with current user id
+                // create websocket action for send msg with type msg and attrs is sender, body and sender_id
+                
+                console.log(username, msg)
+                
+                
+                msgCont.value = "";
+
+            })
+        </script>
+
+
+
+</body>
+</html>
