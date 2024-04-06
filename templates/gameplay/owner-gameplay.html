@@ -1,0 +1,229 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gameplay</title>
+    <link rel="stylesheet" href="{% static 'style/gameplay.css' %}">
+</head>
+<body>
+    
+    <img src="{% static 'images/bg.png' %}" alt="" class="bg">
+    
+    <div class="container">
+        <div class="left">
+            
+            
+            <div class="dot"></div>
+            <div class="controller">
+                <button id="delBtn">مسح الكل</button>
+                <input type="color">
+            </div>
+
+        </div>
+
+        <div class="right">
+            
+            <!-- <div class="msg">
+                <small>Radwan Gaber</small>
+                <div class="body">Apple</div>
+                <button>اجابة صحيحة</button>
+            </div> -->
+
+
+
+
+        </div>
+
+    </div>
+
+    <script>
+        // socket options
+        var user_token = document.cookie.split("=")[document.cookie.split.length];
+        var socket = new WebSocket('ws://127.0.0.1:4444/ws/battle/{{battle_id}}/?token='+user_token)
+
+        socket.onmessage = function(res){
+            var response = JSON.parse(res.data);
+            var res_type = response.type;
+            console.log(response)
+            
+            if (res_type == 'join' && response.username != "{{c_user.full_name}}"){
+                alert(`لقد انضم ${response.username} الي المجموعة`)
+            }
+
+            else if (res_type == 'leave' && response.username != "{{c_user.full_name}}"){
+                alert(`لقد غادر ${response.username} الي المجموعة`)
+            }
+
+            else if (res_type == 'add'){
+                CreateObject(
+                    response.data.x,
+                    response.data.y,
+                    response.data.color,
+                )
+            }
+
+            else if (res_type == 'remove_all'){
+                DeleteAllObjects()
+            }
+
+            else if (res_type == 'msg'){
+                var msgContainer = document.querySelector('.right');
+                var cont = `<div class="msg">
+                    <small>${response.data.sender}</small>
+                    <div class="body">${response.data.body}</div>
+                    <button>اجابة صحيحة</button>
+                </div>`;
+                msgContainer.innerHTML += cont;
+            
+                CreateEventOnNewMessages();    
+            }
+
+            else if (res_type == 'win'){
+                alert(`الفائز هو ${response.data.username} و الاجابة الصحيحة هي ${response
+                .data.answer}`)
+                window.location.href = '{% url "home" %}';
+                
+            }
+        }
+        
+
+    </script>
+
+    <script>
+            // Drawer 
+            var paper = document.querySelector('.left');
+            var dot = document.querySelector('.dot');
+
+            let object_width  = 20 ;
+            let object_height = 20 ;
+            let object_color = '#000';
+
+            let object_x ;
+            let object_y ;
+
+            let last_x ;
+            let last_y ;
+
+            ColorPicker = document.querySelector('.left input[type=color]');
+
+            ColorPicker.addEventListener('change',function(data){
+
+                dot.style.background = this.value
+                object_color = this.value ;
+
+            })
+
+        
+            setInterval(function(){
+            paper.onmousemove = function(event) {
+                var x  = event.clientX ; 
+                var y = event.clientY ;
+                
+            
+                object_x = x;
+                object_y = y;
+            
+                last_x = x ;
+                last_y = y ;
+                
+                dot.style.left = x - 234 + 'px' ; 
+                dot.style.top = y  - 64 + 'px' ;
+            
+            }
+            },1)
+        
+                    
+            function CreateObject(x,y,color){
+                var object = document.createElement('div')
+                object.className = 'object'
+                
+                object.style.left = x - 234 + 'px';
+                object.style.top = y - 64  + 'px';
+                
+                object.style.width = object_width + 'px' ;
+                object.style.height = object_height + 'px' ;
+                
+                object.style.backgroundColor = color ; 
+            
+                paper.appendChild(object)
+
+            }
+            paper.addEventListener('click',function(){
+
+                    var object = document.createElement('div')
+                    object.className = 'object'
+                    
+                    object.style.left = object_x - 234 + 'px';
+                    object.style.top = object_y - 64  + 'px';
+                    
+                    object.style.width = object_width + 'px' ;
+                    object.style.height = object_height + 'px' ;
+                    
+                    object.style.backgroundColor = object_color ; 
+                
+                    // create socket action here with type add and send parametrs x,y and color
+                    //paper.appendChild(object) // raterh than append make the socket action
+                    socket.send(JSON.stringify({
+                        'type' :'add',
+                        'data':{
+                            'x':object_x,
+                            'y':object_y,
+                            'color':object_color
+                        }
+                    }))
+
+            })
+
+        
+            function DeleteAllObjects(){
+                var objs = document.querySelectorAll('.object');
+                objs.forEach(o=>o.remove())
+            }
+            
+            document.querySelector('#delBtn').addEventListener('click',()=>{
+                // send in socket with type remove all
+                socket.send(JSON.stringify({
+                    'type' :'remove_all',
+                    'data':null
+                }))
+            })
+    
+    
+        </script>
+
+
+
+    <script>
+
+
+        function CreateEventOnNewMessages(){
+            // fetch the correct answer
+            var msgs = document.querySelectorAll('.msg');
+    
+            msgs.forEach(msg=>{
+                var username = msg.querySelector('small').textContent;
+                var answer = msg.querySelector('.body').textContent;
+                var doneBtn = msg.querySelector('button');
+    
+                doneBtn.addEventListener('click',()=>{
+                    // Send socket with type win and parameters is username and answer
+                    socket.send(JSON.stringify({
+                        'type' :'win',
+                        'data':{
+                            'username' : username,
+                            'answer' : answer,
+                        }
+                    }))
+                })
+    
+            })
+
+        }
+
+
+    </script>
+
+</body>
+</html>

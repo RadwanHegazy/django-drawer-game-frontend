@@ -1,0 +1,143 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gameplay</title>
+    <link rel="stylesheet" href="{% static 'style/gameplay.css' %}">
+</head>
+<body>
+    
+    <img src="{% static 'images/bg.png' %}" alt="" class="bg">
+    
+    <div class="container">
+        <div class="left">
+            
+            
+        </div>
+
+        <div class="right guest">
+            
+            <!-- <div class="msg">
+                <small>Radwan Gaber</small>
+                <div class="body">Apple</div>
+            </div> -->
+
+
+
+            <div class="send-msg">
+                <input type="text" id="MsgContentVal" placeholder="ادخل الرسالة هنا">
+                <button id="SendMsgBUtton">ارسال</button>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+        // socket options
+        var user_token = document.cookie.split("=")[document.cookie.split.length];
+        var socket = new WebSocket('ws://127.0.0.1:4444/ws/battle/{{battle_id}}/?token='+user_token)
+
+        socket.onmessage = function(res){
+            var response = JSON.parse(res.data);
+            var res_type = response.type;
+            console.log(response)
+            
+            if (res_type == 'join' && response.username != "{{c_user.full_name}}"){
+                alert(`لقد انضم ${response.username} الي المجموعة`)
+            }
+
+            else if (res_type == 'leave' && response.username != "{{c_user.full_name}}"){
+                alert(`لقد غادر ${response.username} الي المجموعة`)
+            }
+
+            else if (res_type == 'add'){
+                CreateObject(
+                    response.data.x,
+                    response.data.y,
+                    response.data.color,
+                )
+            }
+
+
+            else if (res_type == 'remove_all'){
+                DeleteAllObjects()
+            }
+
+            else if (res_type == 'msg'){
+                var msgContainer = document.querySelector('.right');
+                var cont = `<div class="msg">
+                    <small>${response.data.sender}</small>
+                    <div class="body">${response.data.body}</div>
+                </div>`;
+                msgContainer.innerHTML += cont;
+            }
+
+            else if (res_type == 'win'){
+                alert(`الفائز هو ${response.data.username} و الاجابة الصحيحة هي ${response
+                .data.answer}`)
+                window.location.href = '{% url "home" %}';
+            }
+        }
+
+
+                
+    </script>
+
+
+    <script>
+        var paper = document.querySelector('.left');
+
+        function CreateObject(x,y,color){
+            var object = document.createElement('div')
+            object.className = 'object'
+            
+            object.style.left = x - 234 + 'px';
+            object.style.top = y - 64  + 'px';
+            
+            object.style.width = 20 + 'px' ;
+            object.style.height = 20 + 'px' ;
+            
+            object.style.backgroundColor = color ; 
+        
+            paper.appendChild(object)
+
+        }
+            
+            function DeleteAllObjects(){
+                var objs = document.querySelectorAll('.object');
+                objs.forEach(o=>o.remove())
+            }
+            
+    
+            var msgCont = document.getElementById('MsgContentVal');
+            var sendMsgBtn = document.getElementById('SendMsgBUtton');
+            
+            sendMsgBtn.addEventListener('click',()=>{
+                var msg = msgCont.value;
+                var username = "{{c_user.full_name}}"; // replace with current authenticated user
+                var sender_id =  "{{c_user.id}}"; // replace with current user id
+                // create websocket action for send msg with type msg and attrs is sender, body and sender_id
+                
+                socket.send(JSON.stringify({
+                    'type' :'msg',
+                    'data':{
+                        'sender':username,
+                        'body':msg,
+                        'sender_id':sender_id
+                    }
+                }))
+                
+                
+                msgCont.value = "";
+
+            })
+        </script>
+
+
+
+</body>
+</html>
