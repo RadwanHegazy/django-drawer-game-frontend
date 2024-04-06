@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gameplay</title>
+    <link rel="stylesheet" href="style/gameplay.css">
+</head>
+<body>
+    
+    <img src="images/bg.png" alt="" class="bg">
+    
+    <div class="container">
+        <div class="left">
+            
+            
+            <div class="dot"></div>
+            <div class="controller">
+                <button id="delBtn">مسح الكل</button>
+                <input type="color">
+            </div>
+
+        </div>
+
+        <div class="right">
+            
+            <div class="msg">
+                <small>Radwan Gaber</small>
+                <div class="body">Apple</div>
+                <button>اجابة صحيحة</button>
+            </div>
+
+
+            <div class="msg">
+                <small>Ahmed</small>
+                <div class="body">Banana asd</div>
+                <button>اجابة صحيحة</button>
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+    <script>
+            // Drawer 
+            var paper = document.querySelector('.left');
+            var dot = document.querySelector('.dot');
+
+            let object_width  = 20 ;
+            let object_height = 20 ;
+            let object_color = '#000';
+
+            let object_x ;
+            let object_y ;
+
+            let last_x ;
+            let last_y ;
+
+            ColorPicker = document.querySelector('.left input[type=color]');
+
+            ColorPicker.addEventListener('change',function(data){
+
+                dot.style.background = this.value
+                object_color = this.value ;
+
+            })
+
+        
+            setInterval(function(){
+            paper.onmousemove = function(event) {
+                var x  = event.clientX ; 
+                var y = event.clientY ;
+                
+            
+                object_x = x;
+                object_y = y;
+            
+                last_x = x ;
+                last_y = y ;
+                
+                dot.style.left = x - 234 + 'px' ; 
+                dot.style.top = y  - 64 + 'px' ;
+            
+            }
+            },1)
+        
+                    
+            paper.addEventListener('click',function(){
+
+                    var object = document.createElement('div')
+                    object.className = 'object'
+                    
+                    object.style.left = object_x - 234 + 'px';
+                    object.style.top = object_y - 64  + 'px';
+                    
+                    object.style.width = object_width + 'px' ;
+                    object.style.height = object_height + 'px' ;
+                    
+                    object.style.backgroundColor = object_color ; 
+                
+                    // create socket action here with type add and send parametrs x,y and color
+                    paper.appendChild(object) // raterh than append make the socket action
+
+            })
+
+        
+            function DeleteAllObjects(){
+                var objs = document.querySelectorAll('.object');
+                objs.forEach(o=>o.remove())
+            }
+            
+            document.querySelector('#delBtn').addEventListener('click',()=>{
+                // send in socket with type remove all
+                DeleteAllObjects()
+            })
+    
+    
+        </script>
+
+
+
+    <script>
+        // fetch the correct answer
+        var msgs = document.querySelectorAll('.msg');
+
+        msgs.forEach(msg=>{
+            var username = msg.querySelector('small').textContent;
+            var answer = msg.querySelector('.body').textContent;
+            var doneBtn = msg.querySelector('button');
+
+            doneBtn.addEventListener('click',()=>{
+                // Send socket with type win and parameters is username and answer
+            })
+
+        })
+
+
+    </script>
+
+</body>
+</html>
