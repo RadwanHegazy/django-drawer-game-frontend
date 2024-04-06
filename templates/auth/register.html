@@ -1,19 +1,23 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>انشاء حساب</title>
-    <link rel="stylesheet" href="style/auth.css">
+    <link rel="stylesheet" href="{% static 'style/auth.css' %}">
 </head>
 <body>
 
-    <img src="images/bg.png" alt="" class="bg">
+    {% for msg in messages %}
+        <script>alert("{{msg}}")</script>
+    {% endfor %}
     
-    <div class="container">
-    
+    <img src="{% static 'images/bg.png' %}" alt="" class="bg">
+    <form class="container" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
         <div class="img-cont">
-            <img src="images/user.png" alt="" id="imgView">
+            <img src="{% static 'images/user.png' %}" alt="" id="imgView">
             <input type="file" hidden id="imgInput" name="picture">
             <button type="button" id="imgBtn">تغير الصورة</button>
         </div>
@@ -24,13 +28,13 @@
     
 
         <div class="btns">
-            <a href="#">تسجيل الدخول ؟</a>
-            <button>انشاء حساب</button>
+            <a href="{% url 'login' %}">تسجيل الدخول ؟</a>
+            <button type="submit">انشاء حساب</button>
         </div>
-    </div>
+    </form>
 
 
-    <script src="js/changeImg.js"></script>
+    <script src="{% static 'js/changeImg.js' %}"></script>
 
 </body>
 </html>

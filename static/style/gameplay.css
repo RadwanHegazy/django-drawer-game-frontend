@@ -46,14 +46,17 @@ img.bg {
 .container .left{
     background-color: #fff;
     position: relative;
+    height: 90%;
 }
 
-.left .controller {
+
+.controller {
     z-index: 10;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    position: fixed;
+    bottom: 5px;
+
+    border-bottom-left-radius: 30px;
+    width: 200px;
     display: flex;
     flex-direction: row-reverse;
     justify-content: center;
